@@ -102,15 +102,14 @@ fun DetailsScreen(
             modifier = Modifier.padding(10.dp),
             horizontalArrangement = Arrangement.SpaceEvenly) {
             Button(onClick = {
-
+                val product = Product(title, destination, date, quantity, productCost, description, quantPerson)
+                DataProvider.saveProducts(activity, product)
                 navController.navigate("mainScreen")
             }) {
                 Text("Добавить")
             }
             Button(onClick = {
                 //TODO
-                val product = Product(title, destination, date, quantity, productCost, description, quantPerson)
-                DataProvider.saveProducts(activity, product)
             }) {
                 Text("Рассчитать")
             }
