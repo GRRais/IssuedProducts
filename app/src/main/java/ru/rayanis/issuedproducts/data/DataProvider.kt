@@ -26,4 +26,25 @@ object DataProvider {
             }
         }
     }
+
+    private fun retrievePerson(activity: ComponentActivity) =
+        CoroutineScope(Dispatchers.IO).launch {
+        try {
+            val querySnapshot = issuedProductsRef
+                .get()
+                .await()
+            val sb = StringBuilder()
+            for (document in querySnapshot.documents) {
+                val person = document.toObject<Person>()
+                sb.append("$person\n")
+            }
+            withContext(Dispatchers.Main) {
+                b.tvPersons.text = sb.toString()
+            }
+        } catch (e: Exception) {
+            withContext(Dispatchers.Main) {
+                Toast.makeText(activity, e.message, Toast.LENGTH_LONG).show()
+            }
+        }
+    }
 }
