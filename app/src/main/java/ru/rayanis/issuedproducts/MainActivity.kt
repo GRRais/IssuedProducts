@@ -19,14 +19,11 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
 import ru.rayanis.issuedproducts.data.DataProvider
 import ru.rayanis.issuedproducts.data.Product
 import ru.rayanis.issuedproducts.ui.theme.IssuedProductsTheme
 
 class MainActivity : ComponentActivity() {
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -102,7 +99,14 @@ fun DetailsScreen(
             modifier = Modifier.padding(10.dp),
             horizontalArrangement = Arrangement.SpaceEvenly) {
             Button(onClick = {
-                val product = Product(title, destination, date, quantity, productCost, description, quantPerson)
+                val product = Product(
+                    title = title,
+                    destination = destination,
+                    date = date,
+                    quantity = quantity.toInt(),
+                    productCost = productCost.toInt(),
+                    description = description,
+                    quantPersons = quantPerson.toInt())
                 DataProvider.saveProducts(activity, product)
                 navController.navigate("mainScreen")
             }) {
