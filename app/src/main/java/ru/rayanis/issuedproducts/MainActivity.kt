@@ -35,7 +35,7 @@ class MainActivity : ComponentActivity() {
                     startDestination = "mainScreen"
                 ) {
                     composable("mainScreen") {
-                        LoginScreen(navController)
+                        LoginScreen(this@MainActivity, navController)
                     }
                     composable(
                         route = "details",
@@ -53,6 +53,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun LoginScreen(
+    activity: ComponentActivity,
     navController: NavController
 ) {
     Column(
@@ -62,6 +63,7 @@ fun LoginScreen(
         verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.End,
     ) {
+        DataProvider.retrieveProducts(activity)
         FloatingActionButton(onClick = {
             navController.navigate("details")
         },
@@ -174,23 +176,3 @@ fun DetailsScreen(
         }
     }
 }
-
-@Composable
-fun DetailsProperty( label: String) {
-//val product = Product()
-    var title by remember {
-        mutableStateOf("")
-    }
-    Column(modifier = Modifier.padding(6.dp)) {
-
-        OutlinedTextField(
-            value = title,
-            label = { Text(text = label) },
-            onValueChange = {
-                title = it
-            })
-
-    }
-}
-
-

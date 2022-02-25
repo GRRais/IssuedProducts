@@ -3,21 +3,21 @@ package ru.rayanis.issuedproducts.data
 import android.os.Parcelable
 import com.google.firebase.firestore.ServerTimestamp
 import kotlinx.parcelize.Parcelize
+import java.io.Serializable
 import java.util.*
 
-@Parcelize
+
 data class Product(
     var id: String? = null,
     var title: String? = null,
     val destination: String? = null,
-    @ServerTimestamp
     var date: String? = null,
     val quantity: Int? = null,
     val productCost: Int? = null,
     val description: String? = null,
     val quantPersons: Int? = null,
     //val list: MutableList<UsedMaterial>
-):Parcelable
+): Serializable
 
 @Parcelize
 data class UsedMaterial(

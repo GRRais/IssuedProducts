@@ -13,7 +13,7 @@ import kotlinx.coroutines.withContext
 
 object DataProvider {
 
-    val issuedProductsRef = Firebase.firestore.collection("issuedProducts")
+    private val issuedProductsRef = Firebase.firestore.collection("issuedProducts")
     var productList = mutableListOf<Product>()
 
     fun saveProducts(activity: ComponentActivity, product: Product) =
@@ -30,7 +30,7 @@ object DataProvider {
         }
     }
 
-    private fun retrievePerson(activity: ComponentActivity) =
+    fun retrieveProducts(activity: ComponentActivity) =
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val querySnapshot = issuedProductsRef
