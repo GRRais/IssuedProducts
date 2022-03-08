@@ -1,6 +1,7 @@
 package ru.rayanis.issuedproducts
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -19,10 +20,20 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.ktx.toObject
+import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import ru.rayanis.issuedproducts.data.DataProvider
 import ru.rayanis.issuedproducts.data.Product
 import ru.rayanis.issuedproducts.ui.theme.IssuedProductsTheme
@@ -61,16 +72,16 @@ class MainActivity : ComponentActivity() {
 fun ProductsActivityScreen(
     activity: ComponentActivity,
     navController: NavController,
-    productViewModel: ProductViewModel
+    productDetailsViewModel: ProductDetailsViewModel = viewModel()
 ) {
-    val products: List<Product> by productViewModel.products.observeAsState(listOf())
+    val products: List<Product> by productDetailsViewModel.products.observeAsState(listOf())
 
     ProductsScreen(
         activity = activity,
         navController = navController,
         products = products,
-        onAddProduct = { productViewModel.addProduct(it) },
-        onRemoveProduct = { productViewModel.removeProduct(it) }
+        onAddProduct = { productDetailsViewModel.addProduct(it) },
+        onRemoveProduct = { productDetailsViewModel.removeProduct(it) }
     )
 }
 
@@ -84,11 +95,12 @@ fun ProductsScreen(
 ) {
     Column(
         modifier = Modifier
-            .padding(end = 8.dp, bottom = 8.dp)
+            .padding(end = 8.dp , bottom = 8.dp)
             .fillMaxSize(),
         verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.End,
     ) {
+
         DataProvider.retrieveProducts(activity)
         FloatingActionButton(onClick = {
             navController.navigate("details")
@@ -121,17 +133,16 @@ fun ProductsHomeContent(navigateToDetails: (Product) -> Unit) {
 @Composable
 fun DetailsScreen(
     activity: ComponentActivity,
-    navController: NavController
+    navController: NavController,
+    productDetailsViewModel: ProductDetailsViewModel = viewModel()
 ) {
-
-    var title by remember { mutableStateOf("") }
-    var destination by remember { mutableStateOf("") }
-    var date by remember { mutableStateOf("") }
-    var quantity by remember { mutableStateOf("") }
-    var productCost by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-    var quantPerson by remember { mutableStateOf("") }
-
+    val title by productDetailsViewModel.title.observeAsState("")
+    val destination by productDetailsViewModel.destination.observeAsState("")
+    val date by productDetailsViewModel.date.observeAsState("")
+    val quantity by productDetailsViewModel.quantity.observeAsState("")
+    val productCost by productDetailsViewModel.productCost.observeAsState("")
+    val description by productDetailsViewModel.description.observeAsState("")
+    val quantPerson by productDetailsViewModel.quantPerson.observeAsState("")
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Top,
@@ -141,15 +152,18 @@ fun DetailsScreen(
             modifier = Modifier.padding(10.dp),
             horizontalArrangement = Arrangement.SpaceEvenly) {
             Button(onClick = {
-                val product = Product(
+                val product = productDetailsViewModel.products(
                     title = title,
                     destination = destination,
                     date = date,
                     quantity = quantity.toInt(),
                     productCost = productCost.toInt(),
                     description = description,
-                    quantPersons = quantPerson.toInt())
+                    quantPersons = quantPerson.toInt()
+                )
+
                 DataProvider.saveProducts(activity, product)
+
                 navController.navigate("mainScreen")
             }) {
                 Text("Добавить")
@@ -162,57 +176,43 @@ fun DetailsScreen(
         }
         Text("Карточка изделия ", textAlign = TextAlign.Center)
 
-        OutlinedTextField(
+        ProductsDetailTF(
             value = title,
-            label = { Text(text = stringResource(id = R.string.title)) },
-            onValueChange = {
-                title = it
-            })
-        OutlinedTextField(
+            label = stringResource(id = R.string.title),
+            onValueChange = {productDetailsViewModel.onTitleChange(it)})
+        ProductsDetailTF(
             value = destination,
-            label = { Text(text = stringResource(id = R.string.destination)) },
-            onValueChange = {
-                destination = it
-            })
-        OutlinedTextField(
+            label = stringResource(id = R.string.destination),
+            onValueChange = {productDetailsViewModel.onDestinationChange(it)})
+        ProductsDetailTF(
             value = date,
-            label = { Text(text = stringResource(id = R.string.date)) },
-            onValueChange = {
-                date = it
-            })
-        OutlinedTextField(
+            label = stringResource(id = R.string.date),
+            onValueChange = {productDetailsViewModel.onDateChange(it)})
+        ProductsDetailTF(
             value = quantity,
-            label = { Text(text = stringResource(id = R.string.quantity)) },
-            onValueChange = {
-                quantity = it
-            })
-        OutlinedTextField(
+            label = stringResource(id = R.string.quantity),
+            onValueChange = {productDetailsViewModel.onQuantityChange(it)})
+        ProductsDetailTF(
             value = productCost,
-            label = { Text(text = stringResource(id = R.string.productCost)) },
-            onValueChange = {
-                productCost = it
-            })
-        OutlinedTextField(
+            label = stringResource(id = R.string.productCost),
+            onValueChange = {productDetailsViewModel.onProductCostChange(it)})
+        ProductsDetailTF(
             value = description,
-            label = { Text(text = stringResource(id = R.string.description)) },
-            onValueChange = {
-                description = it
-            })
-        OutlinedTextField(
+            label = stringResource(id = R.string.description),
+            onValueChange = {productDetailsViewModel.onDescriptionChange(it)})
+        ProductsDetailTF(
             value = quantPerson,
-            label = { Text(text = stringResource(id = R.string.quantPersons)) },
-            onValueChange = {
-                quantPerson = it
-            })
-
-        val message = remember{mutableStateOf("")}
-        Column {
-            Text(message.value, fontSize = 28.sp)
-            TextField(
-                value = message.value,
-                textStyle = TextStyle(fontSize=25.sp) ,
-                onValueChange = {newText -> message.value = newText}
-            )
-        }
+            label = stringResource(id = R.string.quantPersons),
+            onValueChange = {productDetailsViewModel.onQuantPersonChange(it)}
+        )
     }
+}
+
+//поле ввода значения
+@Composable
+fun ProductsDetailTF(value: String, label: String, onValueChange: (String) -> Unit) {
+        OutlinedTextField(
+            value = value,
+            label = { Text(text = label)},
+            onValueChange = onValueChange)
 }

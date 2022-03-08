@@ -4,6 +4,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
+import com.google.firebase.firestore.ktx.toObjects
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -33,9 +34,7 @@ object DataProvider {
     fun retrieveProducts(activity: ComponentActivity) =
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val querySnapshot = issuedProductsRef
-                    .get()
-                    .await()
+                val querySnapshot = issuedProductsRef.get().await()
                 for (document in querySnapshot.documents) {
                     val product = document.toObject<Product>()
                     if (product != null) {
@@ -43,6 +42,7 @@ object DataProvider {
                     }
                 }
                 withContext(Dispatchers.Main) {
+                    return@withContext
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
