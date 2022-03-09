@@ -1,5 +1,6 @@
 package ru.rayanis.issuedproducts
 
+import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -24,17 +25,21 @@ class ProductDetailsViewModel: ViewModel() {
     val description: LiveData<String> = _title
     val quantPerson: LiveData<String> = _title
 
-    private var _products = MutableLiveData(Product())
-    val products: LiveData<Product> = _products
+    private val _products = MutableLiveData(Product())
+    val product: LiveData<Product> = _products
 
     //состояние списка выпущенных продуктов
-    private var _productsList = MutableLiveData(listOf<Product>())
+    private var _productsList = MutableLiveData(DataProvider.productList)
     val productsList: LiveData<List<Product>> = _productsList
 
-    val context: ComponentActivity
-    //событие добавление продукта
-    fun addProduct(product: Product) {
-        DataProvider.saveProducts(context,  )
+
+    fun shareProductsToScreen(activity: MainActivity) {
+       // _productsList = DataProvider.retrieveProducts(activity)
+    }
+
+    //событие сохранение продукта
+    fun saveProduct(context: ComponentActivity, product: Product) {
+        DataProvider.saveProducts(context,  product)
     }
 
     fun removeProduct(product: Product) {

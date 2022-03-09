@@ -40,7 +40,7 @@ import ru.rayanis.issuedproducts.ui.theme.IssuedProductsTheme
 
 class MainActivity : ComponentActivity() {
 
-    private val productViewModel by viewModels<ProductViewModel>()
+    private val productDetailsViewModel by viewModels<ProductDetailsViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,7 +52,7 @@ class MainActivity : ComponentActivity() {
                     startDestination = "mainScreen"
                 ) {
                     composable("mainScreen") {
-                        ProductsActivityScreen(this@MainActivity, navController, productViewModel)
+                        ProductsActivityScreen(this@MainActivity, navController, productDetailsViewModel)
                     }
                     composable(
                         route = "details",
@@ -74,13 +74,15 @@ fun ProductsActivityScreen(
     navController: NavController,
     productDetailsViewModel: ProductDetailsViewModel = viewModel()
 ) {
-    val products: List<Product> by productDetailsViewModel.products.observeAsState(listOf())
+    //val products: List<Product> by productDetailsViewModel.productsList.observeAsState(listOf())
 
+    DataProvider.retrieveProducts(activity)
+    val productsList = DataProvider.productList
     ProductsScreen(
         activity = activity,
         navController = navController,
-        products = products,
-        onAddProduct = { productDetailsViewModel.addProduct(it) },
+        products = productsList,
+        onAddProduct = { productDetailsViewModel.saveProduct(activity, it) },
         onRemoveProduct = { productDetailsViewModel.removeProduct(it) }
     )
 }
@@ -101,7 +103,7 @@ fun ProductsScreen(
         horizontalAlignment = Alignment.End,
     ) {
 
-        DataProvider.retrieveProducts(activity)
+        ProductsHomeContent(navigateToDetails = navController, )
         FloatingActionButton(onClick = {
             navController.navigate("details")
         },
@@ -143,6 +145,8 @@ fun DetailsScreen(
     val productCost by productDetailsViewModel.productCost.observeAsState("")
     val description by productDetailsViewModel.description.observeAsState("")
     val quantPerson by productDetailsViewModel.quantPerson.observeAsState("")
+    val product by productDetailsViewModel.product.observeAsState()
+
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Top,
@@ -152,7 +156,7 @@ fun DetailsScreen(
             modifier = Modifier.padding(10.dp),
             horizontalArrangement = Arrangement.SpaceEvenly) {
             Button(onClick = {
-                val product = productDetailsViewModel.products(
+                 val product = Product(
                     title = title,
                     destination = destination,
                     date = date,
@@ -162,7 +166,7 @@ fun DetailsScreen(
                     quantPersons = quantPerson.toInt()
                 )
 
-                DataProvider.saveProducts(activity, product)
+                productDetailsViewModel.saveProduct(activity, product)
 
                 navController.navigate("mainScreen")
             }) {

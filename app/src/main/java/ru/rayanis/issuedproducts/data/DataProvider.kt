@@ -17,20 +17,23 @@ object DataProvider {
     private val issuedProductsRef = Firebase.firestore.collection("issuedProducts")
     var productList = mutableListOf<Product>()
 
-    fun saveProducts(activity: ComponentActivity, product: Product) =
+
+    //сохранение в firestore изготовленных изделий
+    fun saveProducts(activity: ComponentActivity , product: Product) =
         CoroutineScope(Dispatchers.IO).launch {
-        try {
-            issuedProductsRef.add(product)
-            withContext(Dispatchers.Main) {
-                Toast.makeText(activity, "Успешно сохранен", Toast.LENGTH_LONG).show()
-            }
-        } catch (e: Exception) {
-            withContext(Dispatchers.Main) {
-                Toast.makeText(activity, e.message, Toast.LENGTH_LONG).show()
+            try {
+                issuedProductsRef.add(product)
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(activity , "Успешно сохранен" , Toast.LENGTH_LONG).show()
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(activity , e.message , Toast.LENGTH_LONG).show()
+                }
             }
         }
-    }
 
+    //извлечение изготовленных изделий с firestore
     fun retrieveProducts(activity: ComponentActivity) =
         CoroutineScope(Dispatchers.IO).launch {
             try {
@@ -46,7 +49,7 @@ object DataProvider {
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(activity, e.message, Toast.LENGTH_LONG).show()
+                    Toast.makeText(activity , e.message , Toast.LENGTH_LONG).show()
                 }
             }
         }
