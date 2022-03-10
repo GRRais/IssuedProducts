@@ -29,7 +29,7 @@ class ProductDetailsViewModel: ViewModel() {
     val product: LiveData<Product> = _products
 
     //состояние списка выпущенных продуктов
-    private var _productsList = MutableLiveData(DataProvider.productList)
+    private val _productsList = MutableLiveData(DataProvider.productList)
     val productsList: LiveData<List<Product>> = _productsList
 
 

@@ -72,15 +72,14 @@ class MainActivity : ComponentActivity() {
 fun ProductsActivityScreen(
     activity: ComponentActivity,
     navController: NavController,
+    navigateToDetails: (Product) -> Unit,
     productDetailsViewModel: ProductDetailsViewModel = viewModel()
 ) {
-    //val products: List<Product> by productDetailsViewModel.productsList.observeAsState(listOf())
-
     DataProvider.retrieveProducts(activity)
     val productsList = DataProvider.productList
     ProductsScreen(
-        activity = activity,
         navController = navController,
+        navigateToDetails = navigateToDetails,
         products = productsList,
         onAddProduct = { productDetailsViewModel.saveProduct(activity, it) },
         onRemoveProduct = { productDetailsViewModel.removeProduct(it) }
@@ -89,8 +88,8 @@ fun ProductsActivityScreen(
 
 @Composable
 fun ProductsScreen(
-    activity: ComponentActivity,
     navController: NavController,
+    navigateToDetails: (Product) -> Unit,
     products: List<Product>,
     onAddProduct: (Product) -> Unit,
     onRemoveProduct: (Product) -> Unit,
@@ -103,7 +102,7 @@ fun ProductsScreen(
         horizontalAlignment = Alignment.End,
     ) {
 
-        ProductsHomeContent(navigateToDetails = navController, )
+        ProductsHomeContent(navigateToDetails = navigateToDetails)
         FloatingActionButton(onClick = {
             navController.navigate("details")
         },
