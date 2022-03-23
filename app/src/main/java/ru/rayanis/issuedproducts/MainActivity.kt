@@ -153,7 +153,7 @@ fun DetailsScreen(
     ) {
         Row(
             modifier = Modifier.padding(10.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly) {
+            horizontalArrangement = Arrangement.SpaceBetween) {
             Button(onClick = {
                  val product = Product(
                     title = title,
